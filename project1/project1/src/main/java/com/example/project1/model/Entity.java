@@ -1,0 +1,1 @@
+// This file is no longer needed. The MyEntity class is now in MyEntity.java.
