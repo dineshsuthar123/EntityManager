@@ -48,21 +48,31 @@ This document provides guidance on deploying the application to production envir
    VITE_API_URL=https://your-backend-api-url.com/api
    ```
 
-2. Deploy to Vercel:
+2. Deploy to Vercel using our enhanced deployment script:
    ```
-   cd UI-Frontend
-   vercel
+   # On Windows
+   .\deploy-vercel.ps1
+   
+   # On Linux/Mac
+   ./deploy-vercel.sh
    ```
    
-   For production deployment:
+   This script will:
+   - Guide you through the deployment process
+   - Help you set up environment variables correctly
+   - Provide options for testing with local or deployed backends
+   - Handle TypeScript build issues
+
+3. Testing with a local backend:
    ```
-   vercel --prod
+   # After deploying to Vercel
+   .\test-with-local-backend.ps1
    ```
    
-3. Alternative: Use the deployment script:
-   ```
-   ./deploy.ps1
-   ```
+   This script will:
+   - Create a tunnel to expose your local backend to the internet
+   - Guide you through updating your Vercel environment variables
+   - Allow you to test your deployed frontend with your local backend
 
 ## CORS Configuration
 
