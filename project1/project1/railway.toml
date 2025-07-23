@@ -1,0 +1,9 @@
+﻿[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "java -jar target/project1-1.0-SNAPSHOT.jar"
+
+[env]
+PORT = "8080"
+SPRING_PROFILES_ACTIVE = "prod"
