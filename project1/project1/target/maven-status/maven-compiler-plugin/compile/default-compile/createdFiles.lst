@@ -43,3 +43,4 @@ com\example\project1\config\WebConfig$1.class
 com\example\project1\controller\MyEntityRestController.class
 com\example\project1\dto\LoginRequest.class
 com\example\project1\service\EntityService.class
+com\example\project1\config\DataInitializer.class

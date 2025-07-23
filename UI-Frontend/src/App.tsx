@@ -17,10 +17,8 @@ import Reports from './components/Reports';
 import AdvancedSearch from './components/AdvancedSearch';
 import ImportExportTools from './components/ImportExportTools';
 import Login from './components/Login';
-import GridItem from './components/utils/GridItem';
 import Signup from './components/Signup';
-import Unauthorized from './components/Unauthorized';
-import ProtectedRoute from './components/ProtectedRoute';
+import GridItem from './components/utils/GridItem';
 import type { MyEntityDTO } from './types/MyEntityDTO';
 import { CustomColumnType } from './types/MyEntityDTO';
 import AuthService from './services/auth.service';
@@ -37,14 +35,15 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState<{ open: boolean, message: string, severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
-
-  // Get user roles from authentication service
-  const userRoles = AuthService.getRoles();
+  const [isAuthenticated, setIsAuthenticated] = useState(!!AuthService.getCurrentUser());
 
   const fetchEntities = async () => {
     setLoading(true);
     try {
-      const res = await axios.get<MyEntityDTO[]>(API_URL);
+      const token = AuthService.getToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const res = await axios.get<MyEntityDTO[]>(API_URL, { headers });
       setEntities(res.data);
     } catch {
       setSnackbar({ open: true, message: 'Failed to fetch entities', severity: 'error' });
@@ -74,6 +73,11 @@ const App: React.FC = () => {
       document.removeEventListener('customColumnsChanged', handleCustomColumnsChanged);
     };
   }, [selected]);
+
+  // Check authentication status
+  useEffect(() => {
+    setIsAuthenticated(!!AuthService.getCurrentUser());
+  }, []);
 
   const handleCreate = () => {
     setSelected({ name: '', description: '', customColumns: [] });
@@ -159,6 +163,42 @@ const App: React.FC = () => {
               <Tab label="Advanced Search" component={Link} to="/search" />
               <Tab label="Import/Export" component={Link} to="/import-export" />
             </Tabs>
+
+            {/* Authentication Buttons */}
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              {isAuthenticated ? (
+                <Button
+                  color="inherit"
+                  onClick={() => {
+                    AuthService.logout();
+                    setIsAuthenticated(false);
+                    window.location.reload();
+                  }}
+                  sx={{ color: 'white' }}
+                >
+                  Logout
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    color="inherit"
+                    component={Link}
+                    to="/login"
+                    sx={{ color: 'white' }}
+                  >
+                    Login
+                  </Button>
+                  <Button
+                    color="inherit"
+                    component={Link}
+                    to="/signup"
+                    sx={{ color: 'white' }}
+                  >
+                    Sign Up
+                  </Button>
+                </>
+              )}
+            </Box>
           </Toolbar>
         </AppBar>
 
@@ -234,73 +274,63 @@ const App: React.FC = () => {
         <Box sx={{ flex: 1, p: 3, width: '100%', boxSizing: 'border-box' }}>
           <Container maxWidth="xl">
             <Routes>
-              {/* Public Routes */}
+              {/* Authentication Routes */}
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-              <Route path="/unauthorized" element={<Unauthorized />} />
 
-              {/* Protected Routes */}
-              <Route element={<ProtectedRoute />}>
-                {/* Routes accessible to any authenticated user */}
-                <Route path="/" element={
-                  <Paper elevation={3} sx={{ p: { xs: 2, sm: 3, md: 4 }, borderRadius: 2, width: '100%', boxSizing: 'border-box' }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                      <Typography variant="h5" fontWeight={600}>Entity List</Typography>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleCreate}
-                        sx={{ fontWeight: 600, borderRadius: 2, boxShadow: 2 }}
-                      >
-                        Add New Entity
-                      </Button>
-                    </Box>
-                    <MyEntityList entities={entities} onEdit={handleEdit} onDelete={handleDelete} />
-                  </Paper>
-                } />
+              {/* Main Routes */}
+              <Route path="/" element={
+                <Paper elevation={3} sx={{ p: { xs: 2, sm: 3, md: 4 }, borderRadius: 2, width: '100%', boxSizing: 'border-box' }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                    <Typography variant="h5" fontWeight={600}>Entity List</Typography>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleCreate}
+                      sx={{ fontWeight: 600, borderRadius: 2, boxShadow: 2 }}
+                    >
+                      Add New Entity
+                    </Button>
+                  </Box>
+                  <MyEntityList entities={entities} onEdit={handleEdit} onDelete={handleDelete} />
+                </Paper>
+              } />
 
-                <Route path="/dashboard" element={
-                  <Dashboard entities={entities} isLoading={loading} />
-                } />
+              <Route path="/dashboard" element={
+                <Dashboard entities={entities} isLoading={loading} />
+              } />
 
-                <Route path="/search" element={
-                  <Paper elevation={3} sx={{ p: { xs: 2, sm: 3, md: 4 }, borderRadius: 2, width: '100%', boxSizing: 'border-box' }}>
-                    <Typography variant="h5" fontWeight={600} sx={{ mb: 3 }}>Advanced Search</Typography>
-                    <AdvancedSearch
-                      entities={entities}
-                      availableFields={[
-                        { name: 'name', type: CustomColumnType.TEXT },
-                        { name: 'description', type: CustomColumnType.TEXT },
-                        { name: 'createdDate', type: CustomColumnType.DATE },
-                        { name: 'lastModifiedDate', type: CustomColumnType.DATE },
-                        // Add custom column types that might be common across entities
-                        ...(entities.length > 0 && entities[0].customColumns
-                          ? entities[0].customColumns
-                            .filter(col => col.name)
-                            .map(col => ({
-                              name: col.name,
-                              type: col.columnType || CustomColumnType.TEXT
-                            }))
-                          : [])
-                      ]}
-                      onSearch={criteria => {
-                        console.log("Search criteria:", criteria);
-                        // We don't need to handle the search results explicitly here
-                        // because the AdvancedSearch component now handles filtering internally
-                      }}
-                    />
-                  </Paper>
-                } />
+              <Route path="/search" element={
+                <Paper elevation={3} sx={{ p: { xs: 2, sm: 3, md: 4 }, borderRadius: 2, width: '100%', boxSizing: 'border-box' }}>
+                  <Typography variant="h5" fontWeight={600} sx={{ mb: 3 }}>Advanced Search</Typography>
+                  <AdvancedSearch
+                    entities={entities}
+                    availableFields={[
+                      { name: 'name', type: CustomColumnType.TEXT },
+                      { name: 'description', type: CustomColumnType.TEXT },
+                      { name: 'createdDate', type: CustomColumnType.DATE },
+                      { name: 'lastModifiedDate', type: CustomColumnType.DATE },
+                      // Add custom column types that might be common across entities
+                      ...(entities.length > 0 && entities[0].customColumns
+                        ? entities[0].customColumns
+                          .filter(col => col.name)
+                          .map(col => ({
+                            name: col.name,
+                            type: col.columnType || CustomColumnType.TEXT
+                          }))
+                        : [])
+                    ]}
+                    onSearch={criteria => {
+                      console.log("Search criteria:", criteria);
+                      // We don't need to handle the search results explicitly here
+                      // because the AdvancedSearch component now handles filtering internally
+                    }}
+                  />
+                </Paper>
+              } />
 
-                <Route path="/import-export" element={<ImportExportTools />} />
-              </Route>
-
-              {/* Admin/Moderator Only Routes */}
-              <Route element={<ProtectedRoute requiredRoles={['ROLE_ADMIN', 'ROLE_MODERATOR']} />}>
-                <Route path="/reports" element={
-                  <Reports userRoles={AuthService.getRoles()} />
-                } />
-              </Route>
+              <Route path="/import-export" element={<ImportExportTools />} />
+              <Route path="/reports" element={<Reports />} />
 
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

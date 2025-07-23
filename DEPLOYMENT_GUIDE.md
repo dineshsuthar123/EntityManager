@@ -1,55 +1,265 @@
-# Deployment Guide
+# Entity Management System - Deployment Guide
 
-This document provides guidance on deploying the application to production environments.
+A comprehensive guide for deploying the Entity Management System (Spring Boot backend + React frontend) to various platforms.
 
-## Application Structure
-- Backend: Spring Boot application located in `project1/project1`
-- Frontend: React application located in `UI-Frontend`
+## 📋 Overview
 
-## Changes Made for Deployment
+This system consists of:
+- **Backend**: Spring Boot REST API with JWT authentication
+- **Frontend**: React + TypeScript application with Material-UI
+- **Database**: H2 (development) / PostgreSQL (production)
 
-1. **Environment Configuration**
-   - Created `.env.development` and `.env.production` files
-   - Added `src/config/api-config.ts` to centralize API URLs
+## 🛠️ Prerequisites
 
-2. **API URL References**
-   - Updated hardcoded URLs in `auth.service.ts`, `App.tsx`, and `ImportExportTools.tsx`
-   - All API URLs now come from environment variables
+- Node.js 18.x or higher
+- Java 17 or higher
+- Maven 3.6+
+- Git
+- Docker (optional, for containerized deployment)
 
-3. **Vite Configuration**
-   - Updated `vite.config.ts` for production builds
-   - Added proper port configuration
+## 🚀 Quick Start
 
-4. **Vercel Configuration**
-   - Added `vercel.json` for Vercel deployment
-   - Configured SPA routing
+### 1. Local Development Setup
 
-5. **Deployment Script**
-   - Enhanced `deploy.ps1` with Vercel deployment options
+```bash
+# Clone the repository
+git clone <repository-url>
+cd java-only
 
-## Deployment Steps
+# Backend setup
+cd project1/project1
+./mvnw spring-boot:run
 
-### Backend Deployment
+# Frontend setup (new terminal)
+cd ../../UI-Frontend
+npm install
+npm run dev
+```
 
-1. Build the backend:
+Access the application:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8080
+
+### 2. Production Deployment
+
+Choose your deployment platform:
+
+#### Option A: Vercel (Frontend) + Railway/Heroku (Backend)
+```bash
+# Deploy frontend to Vercel
+./deploy-vercel.sh
+
+# Deploy backend to Railway/Heroku
+./deploy-backend.sh
+```
+
+#### Option B: Docker Deployment
+```bash
+# Build and run with Docker
+./deploy-docker.sh
+```
+
+## 📁 Available Deployment Scripts
+
+### `deploy-vercel.sh` / `deploy-vercel.ps1`
+Deploys the React frontend to Vercel with optimized build settings.
+
+**Features:**
+- Automatic Vercel CLI installation
+- Environment variable configuration
+- Production-optimized build
+- CORS setup guidance
+
+**Usage:**
+```bash
+# Linux/Mac
+chmod +x deploy-vercel.sh
+./deploy-vercel.sh
+
+# Windows
+./deploy-vercel.ps1
+```
+
+### `deploy-backend.ps1`
+Deploys the Spring Boot backend to cloud platforms (Railway, Heroku, etc.).
+
+**Features:**
+- JAR file packaging
+- Environment configuration
+- Database setup
+- Cloud platform deployment
+
+**Usage:**
+```powershell
+./deploy-backend.ps1
+```
+
+### `deploy.ps1`
+Complete full-stack deployment script for both frontend and backend.
+
+**Features:**
+- Sequential deployment of backend and frontend
+- Environment synchronization
+- Health checks
+- Rollback capabilities
+
+**Usage:**
+```powershell
+./deploy.ps1
+```
+
+## 🌐 Platform-Specific Deployment
+
+### Vercel (Frontend)
+
+1. **Prepare for deployment:**
+   ```bash
+   cd UI-Frontend
+   npm run build:vercel
    ```
+
+### Railway (Backend)
+
+1. **Prepare Spring Boot application:**
+   ```bash
    cd project1/project1
-   mvn clean package
+   ./mvnw clean package -DskipTests
    ```
 
-2. Deploy the resulting JAR file to your server
-   - The JAR is located at `project1/project1/target/project1-1.0-SNAPSHOT.jar`
-   - Run with: `java -jar project1-1.0-SNAPSHOT.jar`
-
-### Frontend Deployment to Vercel
-
-1. Update the production API URL in `.env.production`:
+2. **Create `railway.toml`:**
+   ```toml
+   [build]
+   builder = "NIXPACKS"
+   
+   [deploy]
+   startCommand = "java -jar target/project1-1.0-SNAPSHOT.jar"
+   
+   [env]
+   PORT = "8080"
    ```
-   VITE_API_URL=https://your-backend-api-url.com/api
+
+3. **Deploy:**
+   ```bash
+   railway login
+   railway link
+   railway up
    ```
 
-2. Deploy to Vercel using our enhanced deployment script:
+### Heroku (Backend)
+
+1. **Create `Procfile`:**
    ```
+   web: java -jar target/project1-1.0-SNAPSHOT.jar --server.port=$PORT
+   ```
+
+2. **Create `system.properties`:**
+   ```
+   java.runtime.version=17
+   ```
+
+3. **Deploy:**
+   ```bash
+   heroku create your-app-name
+   git push heroku main
+   ```
+
+## 🔧 Environment Configuration
+
+### Backend Environment Variables
+
+```env
+# Database
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/entitydb
+SPRING_DATASOURCE_USERNAME=username
+SPRING_DATASOURCE_PASSWORD=password
+
+# JWT
+JWT_SECRET=your-secret-key
+JWT_EXPIRATION=86400
+
+# Server
+SERVER_PORT=8080
+SPRING_PROFILES_ACTIVE=prod
+```
+
+### Frontend Environment Variables
+
+```env
+# API Configuration
+VITE_API_URL=https://your-backend-api-url.com/api
+
+# Optional: Debug mode
+VITE_DEBUG=false
+```
+
+## 🔐 Security Configuration
+
+### CORS Setup (Backend)
+```java
+@CrossOrigin(origins = {
+    "http://localhost:3000",
+    "https://your-frontend-domain.vercel.app"
+})
+```
+
+### JWT Configuration
+- Use strong secret keys (minimum 256 bits)
+- Set appropriate expiration times
+- Implement refresh token mechanism
+
+## 🚨 Troubleshooting
+
+### Common Deployment Issues
+
+1. **CORS Errors**
+   ```java
+   // Add allowed origins in SecurityConfig
+   .antMatchers("/api/**").permitAll()
+   ```
+
+2. **Environment Variable Issues**
+   ```bash
+   # Check if variables are set
+   echo $VITE_API_URL
+   ```
+
+3. **Build Failures**
+   ```bash
+   # Clear caches
+   npm run clean
+   ./mvnw clean
+   ```
+
+4. **Database Connection Issues**
+   ```properties
+   # Check database URL format
+   spring.datasource.url=jdbc:postgresql://host:port/database
+   ```
+
+### Debug Commands
+
+```bash
+# Check backend logs
+heroku logs --tail -a your-backend-app
+
+# Check frontend deployment
+vercel logs
+
+# Test API endpoints
+curl -X GET https://your-api-url.com/api/health
+```
+
+## 📞 Support
+
+For deployment issues:
+1. Check the troubleshooting section
+2. Review platform-specific documentation
+3. Create an issue in the repository
+4. Contact the development team
+
+## 📄 License
+
+This deployment guide is part of the Entity Management System project and follows the same license terms.
    # On Windows
    .\deploy-vercel.ps1
    

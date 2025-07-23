@@ -1,93 +1,324 @@
-# UI Frontend Application
+# Entity Management System - Frontend
 
-This is the frontend application built with React, TypeScript, and Vite.
+A modern React application built with TypeScript, Vite, and Material-UI for managing entities with full CRUD operations, authentication, reporting, and data visualization.
 
-## Development Setup
+## 🚀 Features
 
-1. Install dependencies:
+- **User Authentication** - Secure login and registration with JWT tokens
+- **Entity Management** - Complete CRUD operations for entities
+- **Dashboard** - Visual analytics and statistics
+- **Advanced Search** - Powerful filtering and search capabilities
+- **Reports** - Generate and download PDF reports
+- **Import/Export** - CSV and Excel data management
+- **Custom Columns** - Dynamic field management
+- **Responsive Design** - Mobile-friendly interface
+- **Real-time Updates** - Live data synchronization
+
+## 🛠️ Tech Stack
+
+- **React 19** - Frontend framework
+- **TypeScript** - Type-safe development
+- **Vite** - Fast build tool and dev server
+- **Material-UI (MUI)** - UI component library
+- **React Router** - Client-side routing
+- **Axios** - HTTP client
+- **Chart.js** - Data visualization
+- **JWT** - Authentication tokens
+- **File-saver** - File download utilities
+
+## 📋 Prerequisites
+
+- Node.js 18.x or higher
+- npm or yarn package manager
+- Backend API server running (Spring Boot application)
+
+## 🔧 Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd UI-Frontend
    ```
+
+2. **Install dependencies**
+   ```bash
    npm install
    ```
 
-2. Run the development server:
-   ```
-   npm run dev
-   ```
+3. **Environment Configuration**
+   
+## 🚀 Development
 
-3. The application will start on `http://localhost:3000`.
+### Start Development Server
+```bash
+npm run dev
+```
+The application will be available at `http://localhost:3000`
 
-## Production Build
+### Other Available Scripts
 
-1. Create production build:
-   ```
-   npm run build
-   ```
+- `npm run build` - Build for production
+- `npm run build:vercel` - Build with Vercel optimizations
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
-2. Preview the production build locally:
-   ```
-   npm run preview
-   ```
+## 🏗️ Project Structure
 
-## Deployment to Vercel
+```
+src/
+├── components/           # React components
+│   ├── AdvancedSearch.tsx
+│   ├── Dashboard.tsx
+│   ├── ImportExportTools.tsx
+│   ├── Login.tsx
+│   ├── MyEntityForm.tsx
+│   ├── MyEntityList.tsx
+│   ├── Reports.tsx
+│   ├── Signup.tsx
+│   └── utils/           # Utility components
+│       ├── GridContainer.tsx
+│       └── GridItem.tsx
+├── config/              # Configuration files
+│   └── api-config.ts    # API endpoints configuration
+├── services/            # API services
+│   └── auth.service.ts  # Authentication service
+├── types/               # TypeScript type definitions
+│   └── MyEntityDTO.ts   # Entity type definitions
+├── App.tsx              # Main application component
+├── main.tsx            # Application entry point
+└── index.css           # Global styles
+```
 
-### Prerequisites
+## 🔐 Authentication
 
-- Vercel account
-- Vercel CLI installed (`npm install -g vercel`)
+The application uses JWT-based authentication:
 
-### Steps for Deployment
+- **Login**: Users can sign in with username/password
+- **Registration**: New users can create accounts
+- **Token Management**: Automatic token refresh and storage
+- **Protected Routes**: Secure access to authenticated features
 
-1. Update the `.env.production` file with your backend API URL:
-   ```
-   VITE_API_URL=https://your-backend-api-url.com/api
+### Authentication Flow
+1. User logs in with credentials
+2. Backend returns JWT token
+3. Token stored in localStorage
+4. Token included in API requests
+5. Automatic logout on token expiration
+
+## 📱 Features Overview
+
+### Entity Management
+- Create, read, update, delete entities
+- Custom column support
+- Bulk operations
+- Advanced filtering
+
+### Dashboard
+- Entity statistics
+- Data visualizations
+- Quick actions
+- Recent activities
+
+### Reports
+- PDF report generation
+- Custom report templates
+- Entity statistics reports
+- Custom columns reports
+
+### Import/Export
+- CSV file import/export
+- Excel file support
+- Data validation
+- Error handling
+
+## 🌐 API Integration
+
+The frontend communicates with a Spring Boot backend API:
+
+```typescript
+// API Configuration
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+
+export const API_URLS = {
+    AUTH: `${API_BASE_URL}/auth`,
+    ENTITIES: `${API_BASE_URL}/entities`,
+    IMPORT_EXPORT: `${API_BASE_URL}/data`
+};
+```
+
+### API Endpoints Used
+- `POST /api/auth/signin` - User authentication
+- `POST /api/auth/signup` - User registration
+- `GET /api/entities` - Fetch entities
+- `POST /api/entities` - Create entity
+- `PUT /api/entities/{id}` - Update entity
+- `DELETE /api/entities/{id}` - Delete entity
+- `GET /api/data/export` - Export data
+- `POST /api/data/import` - Import data
+
+## 🚀 Deployment
+
+### Local Development
+```bash
+npm run dev
+```
+
+### Production Build
+```bash
+npm run build
+```
+
+### Vercel Deployment
+
+#### Using Deployment Script
+```bash
+# Make script executable (Linux/Mac)
+chmod +x deploy-vercel.sh
+./deploy-vercel.sh
+
+# Windows PowerShell
+./deploy-vercel.ps1
+```
+
+#### Manual Deployment
+1. Install Vercel CLI:
+   ```bash
+   npm install -g vercel
    ```
 
 2. Login to Vercel:
-   ```
+   ```bash
    vercel login
    ```
 
-3. Deploy to Vercel:
-   ```
-   vercel
+3. Set environment variables:
+   ```bash
+   # Create .env.production
+   echo "VITE_API_URL=https://your-backend-api-url.com/api" > .env.production
    ```
 
-4. For production deployment:
-   ```
+4. Deploy:
+   ```bash
+   cd UI-Frontend
    vercel --prod
    ```
 
-5. Your application will be deployed to a URL provided by Vercel.
+### Environment Variables for Production
+Make sure to set these environment variables in your deployment platform:
+- `VITE_API_URL` - Your production API URL
 
-## Environment Variables
+## 🎨 UI Components
 
-- `.env.development`: Used during development
-  ```
-  VITE_API_URL=http://localhost:8080/api
-  ```
+### Material-UI Theme
+The application uses Material-UI with a custom theme:
+- Primary color scheme
+- Responsive breakpoints
+- Consistent typography
+- Accessible design
 
-- `.env.production`: Used for production builds
-  ```
-  VITE_API_URL=https://your-backend-api-url.com/api
-  ```
+### Key Components
+- **MyEntityList**: Data grid with sorting and filtering
+- **MyEntityForm**: Entity creation/editing form
+- **Dashboard**: Analytics and charts
+- **AdvancedSearch**: Complex search interface
+- **Reports**: Report generation interface
 
-## API Configuration
+## 🔧 Configuration
 
-The application uses centralized API endpoints defined in `src/config/api-config.ts`. If you need to add or modify API endpoints, update this file.
-   ```
-   npm run build
-   ```
+### API Configuration
+Edit `src/config/api-config.ts` to configure API endpoints:
 
-2. The build files will be in the `dist` directory.
+```typescript
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+```
 
-## Deployment
+### Vite Configuration
+The `vite.config.ts` file contains build and development server settings:
 
-### Local Deployment
+```typescript
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: 3000
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: true
+  }
+})
+```
 
-Run the deployment script:
+## 🐛 Troubleshooting
 
-```powershell
-./deploy.ps1
+### Common Issues
+
+1. **API Connection Issues**
+   - Check `VITE_API_URL` environment variable
+   - Ensure backend server is running
+   - Verify CORS configuration
+
+2. **Authentication Problems**
+   - Clear localStorage if tokens are corrupted
+   - Check token expiration
+   - Verify backend authentication endpoints
+
+3. **Build Issues**
+   - Run `npm install` to ensure dependencies are installed
+   - Clear node_modules and reinstall if needed
+   - Check for TypeScript errors
+
+### Debug Mode
+Enable debug logging by setting environment variables:
+```env
+VITE_DEBUG=true
+```
+
+## 📚 Dependencies
+
+### Core Dependencies
+- React 19.1.0
+- TypeScript 5.x
+- Vite 6.x
+- Material-UI 7.x
+- React Router 7.x
+- Axios 1.x
+
+### Development Dependencies
+- ESLint - Code linting
+- TypeScript - Type checking
+- Vite plugins - Build optimization
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🆘 Support
+
+For support and questions:
+- Create an issue in the repository
+- Check the troubleshooting section
+- Review the API documentation
+
+## 🔄 Updates
+
+Keep the application updated:
+```bash
+npm update
+```
+
+Check for security vulnerabilities:
+```bash
+npm audit
+npm audit fix
+```
 ```
 
 This will:

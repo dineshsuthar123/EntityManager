@@ -1,181 +1,109 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
 import {
-    Box,
+    Container,
     Paper,
-    Typography,
     TextField,
     Button,
-    Link,
+    Typography,
+    Box,
     Alert,
-    Snackbar,
-    Grid,
     CircularProgress
 } from '@mui/material';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import { useNavigate } from 'react-router-dom';
 import AuthService from '../services/auth.service';
 
 const Login: React.FC = () => {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const [formData, setFormData] = useState({
+        username: '',
+        password: ''
+    });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-
     const navigate = useNavigate();
-    const location = useLocation();
 
-    // Get redirect location from state, default to home page
-    const from = (location.state as any)?.from?.pathname || '/';
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
 
-    const handleLogin = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (!username || !password) {
-            setError('Username and password are required');
-            return;
-        }
-
-        setError('');
         setLoading(true);
+        setError('');
 
         try {
-            await AuthService.login({ username, password });
-            setSnackbarOpen(true);
-
-            // Navigate after a brief delay to show success message
-            setTimeout(() => {
-                navigate(from, { replace: true });
-            }, 1000);
-        } catch (err: any) {
-            setError(
-                err.response?.data?.message ||
-                err.message ||
-                'Login failed. Please check your credentials.'
-            );
+            await AuthService.login(formData.username, formData.password);
+            navigate('/');
+        } catch (error) {
+            setError('Invalid username or password');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <Box
-            sx={{
-                height: '100vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%)',
-            }}
-        >
-            <Paper
-                elevation={3}
+        <Container component="main" maxWidth="xs">
+            <Box
                 sx={{
-                    p: 4,
-                    maxWidth: 450,
-                    width: '100%',
-                    borderRadius: 2,
-                    mx: 2
+                    marginTop: 8,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
                 }}
             >
-                <Box
-                    sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        mb: 3
-                    }}
-                >
-                    <Box
-                        sx={{
-                            bgcolor: 'primary.main',
-                            color: 'white',
-                            p: 2,
-                            borderRadius: '50%',
-                            mb: 2
-                        }}
-                    >
-                        <LockOutlinedIcon fontSize="large" />
-                    </Box>
-                    <Typography component="h1" variant="h5" fontWeight="bold">
-                        Sign in
+                <Paper elevation={3} sx={{ padding: 4, width: '100%' }}>
+                    <Typography component="h1" variant="h4" align="center" gutterBottom>
+                        Sign In
                     </Typography>
-                </Box>
 
-                {error && (
-                    <Alert severity="error" sx={{ mb: 3 }}>
-                        {error}
-                    </Alert>
-                )}
+                    {error && (
+                        <Alert severity="error" sx={{ mb: 2 }}>
+                            {error}
+                        </Alert>
+                    )}
 
-                <Box component="form" onSubmit={handleLogin}>
-                    <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        id="username"
-                        label="Username"
-                        name="username"
-                        autoComplete="username"
-                        autoFocus
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        disabled={loading}
-                        variant="outlined"
-                        sx={{ mb: 2 }}
-                    />
-                    <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        name="password"
-                        label="Password"
-                        type="password"
-                        id="password"
-                        autoComplete="current-password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        disabled={loading}
-                        variant="outlined"
-                        sx={{ mb: 3 }}
-                    />
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        disabled={loading}
-                        sx={{
-                            py: 1.5,
-                            fontSize: '1rem',
-                            fontWeight: 'bold',
-                            mb: 2
-                        }}
-                    >
-                        {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign In'}
-                    </Button>                    <Grid container justifyContent="space-between">
-                        <Grid item>
-                            <Link component={RouterLink} to="/signup" variant="body2" color="primary">
-                                Don't have an account? Sign up
-                            </Link>
-                        </Grid>
-                        <Grid item>
-                            <Link component={RouterLink} to="#" variant="body2" color="primary">
-                                Forgot password?
-                            </Link>
-                        </Grid>
-                    </Grid>
-                </Box>
-
-                <Snackbar
-                    open={snackbarOpen}
-                    autoHideDuration={3000}
-                    onClose={() => setSnackbarOpen(false)}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                >
-                    <Alert severity="success">Login successful! Redirecting...</Alert>
-                </Snackbar>
-            </Paper>
-        </Box>
+                    <Box component="form" onSubmit={handleSubmit}>
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="username"
+                            label="Username"
+                            name="username"
+                            autoComplete="username"
+                            autoFocus
+                            value={formData.username}
+                            onChange={handleChange}
+                            disabled={loading}
+                        />
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
+                            name="password"
+                            label="Password"
+                            type="password"
+                            id="password"
+                            autoComplete="current-password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            disabled={loading}
+                        />
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            disabled={loading}
+                            sx={{ mt: 3, mb: 2 }}
+                        >
+                            {loading ? <CircularProgress size={24} /> : 'Sign In'}
+                        </Button>
+                    </Box>
+                </Paper>
+            </Box>
+        </Container>
     );
 };
 

@@ -14,7 +14,8 @@ public class WebConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**")
                         .allowedOrigins(
-                            "http://localhost:5173", // For local development
+                            "http://localhost:5173", // Default Vite port
+                            "http://localhost:3000", // Port mentioned in CORS error
                             "https://entity-manager.vercel.app" // User's specified Vercel URL
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
