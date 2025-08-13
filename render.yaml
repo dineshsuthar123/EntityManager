@@ -1,0 +1,32 @@
+services:
+  # Spring Boot Backend (Web Service via Docker)
+  - type: web
+    name: entity-backend
+    runtime: docker
+    dockerfilePath: project1/project1/Dockerfile
+    dockerContext: project1/project1
+    autoDeployTrigger: commit
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: JAVA_VERSION
+        value: "17"
+    # healthCheckPath: /actuator/health
+
+  # React Frontend (Static Site)
+  - type: web
+    name: entity-frontend
+    runtime: static
+    rootDir: UI-Frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    autoDeployTrigger: commit
+    envVars:
+      # IMPORTANT: After the first backend deploy, update this to the real backend URL
+      - key: VITE_API_URL
+        value: https://REPLACE-WITH-BACKEND.onrender.com/api
+    routes:
+      # SPA rewrite so client-side routing works on refresh/deep links
+      - type: rewrite
+        source: /*
+        destination: /index.html
