@@ -152,7 +152,7 @@ const ImportExportTools: React.FC = () => {
 
             <Grid container spacing={3}>
                 {/* Export Section */}
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <Box sx={{ mb: 2 }}>
                         <Typography variant="subtitle1" gutterBottom>
                             Export Data
@@ -182,7 +182,7 @@ const ImportExportTools: React.FC = () => {
                 </Grid>
 
                 {/* Import Section */}
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <Box>
                         <Typography variant="subtitle1" gutterBottom>
                             Import Data

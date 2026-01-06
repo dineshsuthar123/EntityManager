@@ -9,10 +9,6 @@ import {
     CardActions,
     Button,
     TextField,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
     Alert,
     Snackbar,
     CircularProgress
@@ -24,12 +20,16 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import axios from 'axios';
 import { saveAs } from 'file-saver';
+import http from '../services/http';
+import { API_URLS } from '../config/api-config';
 
 interface ReportsProps {
     userRoles?: string[];
 }
+
+// Base API URL for reports
+const REPORTS_API = API_URLS.ENTITIES.replace('/entities', '/reports');
 
 const Reports: React.FC<ReportsProps> = ({ userRoles = [] }) => {
     const [startDate, setStartDate] = useState<Date | null>(null);
@@ -41,17 +41,19 @@ const Reports: React.FC<ReportsProps> = ({ userRoles = [] }) => {
         open: false,
         message: '',
         severity: 'success'
-    }); const isAdmin = userRoles.includes('ROLE_ADMIN');
+    });
+
+    const isAdmin = userRoles.includes('ROLE_ADMIN');
     const isModerator = userRoles.includes('ROLE_MODERATOR');
 
     const handleCloseSnackbar = () => {
         setSnackbar({ ...snackbar, open: false });
     };
 
-    const downloadReport = async (url: string, filename: string, params: Record<string, unknown> = {}) => {
+    const downloadReport = async (endpoint: string, filename: string, params: Record<string, unknown> = {}) => {
         try {
             setLoading(true);
-            const response = await axios.get(url, {
+            const response = await http.get(`${REPORTS_API}/${endpoint}`, {
                 params,
                 responseType: 'blob'
             });
@@ -61,11 +63,17 @@ const Reports: React.FC<ReportsProps> = ({ userRoles = [] }) => {
                 message: 'Report downloaded successfully!',
                 severity: 'success'
             });
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error downloading report:', error);
+            let errorMessage = 'Failed to download report. Please try again.';
+            if (error?.response?.status === 401) {
+                errorMessage = 'Please sign in to download reports.';
+            } else if (error?.response?.status === 403) {
+                errorMessage = 'You do not have permission to download this report.';
+            }
             setSnackbar({
                 open: true,
-                message: 'Failed to download report. Please try again.',
+                message: errorMessage,
                 severity: 'error'
             });
         } finally {
@@ -74,18 +82,18 @@ const Reports: React.FC<ReportsProps> = ({ userRoles = [] }) => {
     };
 
     const handleEntityReportDownload = () => {
-        downloadReport('/api/reports/entities', 'entities_report.pdf');
+        downloadReport('entities', 'entities_report.pdf');
     };
 
     const handleCustomColumnsReportDownload = () => {
-        downloadReport('/api/reports/custom-columns', 'custom_columns_report.pdf', {
+        downloadReport('custom-columns', 'custom_columns_report.pdf', {
             title: reportTitle || undefined,
             generatedBy: generatedBy || undefined
         });
     };
 
     const handleStatisticsReportDownload = () => {
-        downloadReport('/api/reports/statistics', 'entity_statistics_report.pdf');
+        downloadReport('statistics', 'entity_statistics_report.pdf');
     };
 
     const handleDateRangeReportDownload = () => {
@@ -98,7 +106,16 @@ const Reports: React.FC<ReportsProps> = ({ userRoles = [] }) => {
             return;
         }
 
-        downloadReport('/api/reports/date-range', 'date_range_report.pdf', {
+        if (startDate > endDate) {
+            setSnackbar({
+                open: true,
+                message: 'Start date must be before end date',
+                severity: 'error'
+            });
+            return;
+        }
+
+        downloadReport('date-range', 'date_range_report.pdf', {
             startDate: startDate.toISOString().split('T')[0],
             endDate: endDate.toISOString().split('T')[0]
         });
@@ -116,7 +133,7 @@ const Reports: React.FC<ReportsProps> = ({ userRoles = [] }) => {
             </Paper>
 
             <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <Card>
                         <CardContent>
                             <Box display="flex" alignItems="center" mb={2}>
@@ -141,7 +158,7 @@ const Reports: React.FC<ReportsProps> = ({ userRoles = [] }) => {
                     </Card>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <Card>
                         <CardContent>
                             <Box display="flex" alignItems="center" mb={2}>
@@ -152,22 +169,24 @@ const Reports: React.FC<ReportsProps> = ({ userRoles = [] }) => {
                                 Generate a report including all custom columns for each entity.
                             </Typography>
                             <Grid container spacing={2}>
-                                <Grid item xs={12}>
+                                <Grid size={12}>
                                     <TextField
                                         label="Report Title"
                                         value={reportTitle}
                                         onChange={(e) => setReportTitle(e.target.value)}
                                         fullWidth
                                         margin="dense"
+                                        size="small"
                                     />
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid size={12}>
                                     <TextField
                                         label="Generated By"
                                         value={generatedBy}
                                         onChange={(e) => setGeneratedBy(e.target.value)}
                                         fullWidth
                                         margin="dense"
+                                        size="small"
                                     />
                                 </Grid>
                             </Grid>
@@ -186,7 +205,7 @@ const Reports: React.FC<ReportsProps> = ({ userRoles = [] }) => {
                 </Grid>
 
                 {(isAdmin || isModerator) && (
-                    <Grid item xs={12} md={6}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                         <Card>
                             <CardContent>
                                 <Box display="flex" alignItems="center" mb={2}>
@@ -212,7 +231,7 @@ const Reports: React.FC<ReportsProps> = ({ userRoles = [] }) => {
                     </Grid>
                 )}
 
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <Card>
                         <CardContent>
                             <Box display="flex" alignItems="center" mb={2}>
@@ -224,20 +243,20 @@ const Reports: React.FC<ReportsProps> = ({ userRoles = [] }) => {
                             </Typography>
                             <LocalizationProvider dateAdapter={AdapterDateFns}>
                                 <Grid container spacing={2}>
-                                    <Grid item xs={6}>
+                                    <Grid size={6}>
                                         <DatePicker
                                             label="Start Date"
                                             value={startDate}
                                             onChange={(date) => setStartDate(date)}
-                                            sx={{ width: '100%' }}
+                                            slotProps={{ textField: { size: 'small', fullWidth: true } }}
                                         />
                                     </Grid>
-                                    <Grid item xs={6}>
+                                    <Grid size={6}>
                                         <DatePicker
                                             label="End Date"
                                             value={endDate}
                                             onChange={(date) => setEndDate(date)}
-                                            sx={{ width: '100%' }}
+                                            slotProps={{ textField: { size: 'small', fullWidth: true } }}
                                         />
                                     </Grid>
                                 </Grid>

@@ -1,27 +1,41 @@
 import React from 'react';
-import { Grid } from '@mui/material';
-import type { GridBaseProps } from '@mui/material';
-import type { SystemProps } from '@mui/system';
-import type { Theme } from '@mui/material/styles';
-import type { SxProps } from '@mui/system';
+import Grid from '@mui/material/Grid';
+import type { SxProps, Theme } from '@mui/material/styles';
 
 type GridItemProps = {
     children: React.ReactNode;
-    xs?: number;
-    sm?: number;
-    md?: number;
-    lg?: number;
-    xl?: number;
+    xs?: number | boolean;
+    sm?: number | boolean;
+    md?: number | boolean;
+    lg?: number | boolean;
+    xl?: number | boolean;
     sx?: SxProps<Theme>;
-} & Omit<GridBaseProps & SystemProps<Theme>, 'component'>;
+};
 
 /**
- * A wrapper for MUI Grid component that automatically adds the component="div" prop
- * to fix the "Property 'component' is missing" TypeScript error in MUI v7+
+ * A wrapper for MUI Grid component that handles responsive sizing
+ * Works with MUI v7+ using the size prop syntax
  */
-export const GridItem: React.FC<GridItemProps> = ({ children, ...props }) => {
+export const GridItem: React.FC<GridItemProps> = ({ 
+    children, 
+    xs, 
+    sm, 
+    md, 
+    lg, 
+    xl,
+    sx,
+    ...rest 
+}) => {
+    // Build the size prop for MUI v7
+    const sizeProps: Record<string, number | boolean | undefined> = {};
+    if (xs !== undefined) sizeProps.xs = xs;
+    if (sm !== undefined) sizeProps.sm = sm;
+    if (md !== undefined) sizeProps.md = md;
+    if (lg !== undefined) sizeProps.lg = lg;
+    if (xl !== undefined) sizeProps.xl = xl;
+
     return (
-        <Grid component="div" item {...props}>
+        <Grid size={sizeProps} sx={sx} {...rest}>
             {children}
         </Grid>
     );

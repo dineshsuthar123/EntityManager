@@ -288,7 +288,7 @@ const Dashboard: React.FC<DashboardProps> = ({ entities, isLoading }) => {
                         </Select>
                     </FormControl>
                 </Box>                <Grid container spacing={3} sx={{ mb: 4 }}>
-                    <Grid item xs={12} sm={6} md={3}>
+                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                         <Card
                             sx={{
                                 bgcolor: 'primary.light',
@@ -310,7 +310,7 @@ const Dashboard: React.FC<DashboardProps> = ({ entities, isLoading }) => {
                             </CardContent>
                         </Card>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
+                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                         <Card
                             sx={{
                                 bgcolor: 'secondary.light',
@@ -334,7 +334,7 @@ const Dashboard: React.FC<DashboardProps> = ({ entities, isLoading }) => {
                             </CardContent>
                         </Card>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
+                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                         <Card
                             sx={{
                                 bgcolor: 'success.light',
@@ -365,7 +365,7 @@ const Dashboard: React.FC<DashboardProps> = ({ entities, isLoading }) => {
                             </CardContent>
                         </Card>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
+                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                         <Card
                             sx={{
                                 bgcolor: 'info.light',
@@ -403,7 +403,7 @@ const Dashboard: React.FC<DashboardProps> = ({ entities, isLoading }) => {
                 <Divider sx={{ my: 4 }} />
 
                 <Grid container spacing={4}>
-                    <Grid item xs={12} md={8}>
+                    <Grid size={{ xs: 12, md: 8 }}>
                         <Typography variant="h6" sx={{ mb: 2 }}>Entity Creation Over Time</Typography>
                         <Paper elevation={2} sx={{ p: 2, height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             {creationStats.labels.length > 0 ? (
@@ -424,7 +424,7 @@ const Dashboard: React.FC<DashboardProps> = ({ entities, isLoading }) => {
                             )}
                         </Paper>
                     </Grid>
-                    <Grid item xs={12} md={4}>
+                    <Grid size={{ xs: 12, md: 4 }}>
                         <Typography variant="h6" sx={{ mb: 2 }}>
                             {customColumnStats.length > 0 ?
                                 `${customColumnStats[0].columnName} Distribution` :

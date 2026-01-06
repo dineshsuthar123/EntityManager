@@ -11,7 +11,7 @@ services:
         value: prod
       - key: JAVA_VERSION
         value: "17"
-    # healthCheckPath: /actuator/health
+    healthCheckPath: /healthz
 
   # React Frontend (Static Site)
   - type: web

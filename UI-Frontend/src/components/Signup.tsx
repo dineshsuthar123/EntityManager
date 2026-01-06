@@ -8,9 +8,10 @@ import {
     Box,
     Alert,
     CircularProgress,
-    Grid
+    Grid,
+    Link as MuiLink
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import AuthService from '../services/auth.service';
 
 const Signup: React.FC = () => {
@@ -32,31 +33,61 @@ const Signup: React.FC = () => {
             ...formData,
             [e.target.name]: e.target.value
         });
+        // Clear error when user starts typing
+        if (error) setError('');
+    };
+
+    const validateForm = (): boolean => {
+        if (!formData.firstName.trim()) {
+            setError('First name is required');
+            return false;
+        }
+        if (!formData.lastName.trim()) {
+            setError('Last name is required');
+            return false;
+        }
+        if (!formData.username.trim() || formData.username.length < 3) {
+            setError('Username must be at least 3 characters');
+            return false;
+        }
+        if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            setError('Please enter a valid email address');
+            return false;
+        }
+        if (!formData.password || formData.password.length < 6) {
+            setError('Password must be at least 6 characters');
+            return false;
+        }
+        if (formData.password !== formData.confirmPassword) {
+            setError('Passwords do not match');
+            return false;
+        }
+        return true;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
-        setError('');
-
-        if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
-            setLoading(false);
+        
+        if (!validateForm()) {
             return;
         }
 
+        setLoading(true);
+        setError('');
+
         try {
             await AuthService.signup({
-                username: formData.username,
-                email: formData.email,
+                username: formData.username.trim(),
+                email: formData.email.trim(),
                 password: formData.password,
-                firstName: formData.firstName,
-                lastName: formData.lastName
+                firstName: formData.firstName.trim(),
+                lastName: formData.lastName.trim()
             });
             setSuccess(true);
             setTimeout(() => navigate('/login'), 2000);
-        } catch (error) {
-            setError('Registration failed. Please try again.');
+        } catch (err: any) {
+            const errorMessage = err?.response?.data?.message || 'Registration failed. Please try again.';
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -76,6 +107,9 @@ const Signup: React.FC = () => {
                     <Typography component="h1" variant="h4" align="center" gutterBottom>
                         Sign Up
                     </Typography>
+                    <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 3 }}>
+                        Create your account to get started
+                    </Typography>
 
                     {error && (
                         <Alert severity="error" sx={{ mb: 2 }}>
@@ -90,10 +124,9 @@ const Signup: React.FC = () => {
                     )}
 
                     <Box component="form" onSubmit={handleSubmit}>
-                        <Grid container columnSpacing={2}>
-                            <Grid xs={12} sm={6}>
+                        <Grid container spacing={2}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
                                 <TextField
-                                    margin="normal"
                                     required
                                     fullWidth
                                     id="firstName"
@@ -102,12 +135,12 @@ const Signup: React.FC = () => {
                                     autoComplete="given-name"
                                     value={formData.firstName}
                                     onChange={handleChange}
-                                    disabled={loading}
+                                    disabled={loading || success}
+                                    autoFocus
                                 />
                             </Grid>
-                            <Grid xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
                                 <TextField
-                                    margin="normal"
                                     required
                                     fullWidth
                                     id="lastName"
@@ -116,12 +149,11 @@ const Signup: React.FC = () => {
                                     autoComplete="family-name"
                                     value={formData.lastName}
                                     onChange={handleChange}
-                                    disabled={loading}
+                                    disabled={loading || success}
                                 />
                             </Grid>
-                            <Grid xs={12}>
+                            <Grid size={12}>
                                 <TextField
-                                    margin="normal"
                                     required
                                     fullWidth
                                     id="username"
@@ -130,12 +162,12 @@ const Signup: React.FC = () => {
                                     autoComplete="username"
                                     value={formData.username}
                                     onChange={handleChange}
-                                    disabled={loading}
+                                    disabled={loading || success}
+                                    helperText="At least 3 characters"
                                 />
                             </Grid>
-                            <Grid xs={12}>
+                            <Grid size={12}>
                                 <TextField
-                                    margin="normal"
                                     required
                                     fullWidth
                                     id="email"
@@ -145,12 +177,11 @@ const Signup: React.FC = () => {
                                     type="email"
                                     value={formData.email}
                                     onChange={handleChange}
-                                    disabled={loading}
+                                    disabled={loading || success}
                                 />
                             </Grid>
-                            <Grid xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
                                 <TextField
-                                    margin="normal"
                                     required
                                     fullWidth
                                     name="password"
@@ -160,12 +191,12 @@ const Signup: React.FC = () => {
                                     autoComplete="new-password"
                                     value={formData.password}
                                     onChange={handleChange}
-                                    disabled={loading}
+                                    disabled={loading || success}
+                                    helperText="At least 6 characters"
                                 />
                             </Grid>
-                            <Grid xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
                                 <TextField
-                                    margin="normal"
                                     required
                                     fullWidth
                                     name="confirmPassword"
@@ -174,7 +205,7 @@ const Signup: React.FC = () => {
                                     id="confirmPassword"
                                     value={formData.confirmPassword}
                                     onChange={handleChange}
-                                    disabled={loading}
+                                    disabled={loading || success}
                                 />
                             </Grid>
                         </Grid>
@@ -183,11 +214,21 @@ const Signup: React.FC = () => {
                             type="submit"
                             fullWidth
                             variant="contained"
-                            disabled={loading}
+                            disabled={loading || success}
                             sx={{ mt: 3, mb: 2 }}
+                            size="large"
                         >
                             {loading ? <CircularProgress size={24} /> : 'Sign Up'}
                         </Button>
+
+                        <Box sx={{ textAlign: 'center' }}>
+                            <Typography variant="body2" color="text.secondary">
+                                Already have an account?{' '}
+                                <MuiLink component={Link} to="/login" underline="hover">
+                                    Sign In
+                                </MuiLink>
+                            </Typography>
+                        </Box>
                     </Box>
                 </Paper>
             </Box>

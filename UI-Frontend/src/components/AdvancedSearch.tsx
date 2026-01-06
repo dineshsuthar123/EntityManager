@@ -236,7 +236,7 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ onSearch, availableFiel
                     const fieldType = getFieldType(criterion.field);
                     return (
                         <Grid container spacing={2} key={index} sx={{ mb: 2, alignItems: 'center' }}>
-                            <Grid item xs={12} sm={3}>
+                            <Grid size={{ xs: 12, sm: 3 }}>
                                 <FormControl fullWidth size="small">
                                     <InputLabel>Field</InputLabel>
                                     <Select
@@ -252,7 +252,7 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ onSearch, availableFiel
                                     </Select>
                                 </FormControl>
                             </Grid>
-                            <Grid item xs={12} sm={3}>
+                            <Grid size={{ xs: 12, sm: 3 }}>
                                 <FormControl fullWidth size="small">
                                     <InputLabel>Operator</InputLabel>
                                     <Select
@@ -268,7 +268,7 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ onSearch, availableFiel
                                     </Select>
                                 </FormControl>
                             </Grid>
-                            <Grid item xs={12} sm={5}>
+                            <Grid size={{ xs: 12, sm: 5 }}>
                                 {fieldType === CustomColumnType.BOOLEAN ? (
                                     <FormControl fullWidth size="small">
                                         <InputLabel>Value</InputLabel>
@@ -301,7 +301,7 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ onSearch, availableFiel
                                     />
                                 )}
                             </Grid>
-                            <Grid item xs={12} sm={1} sx={{ display: 'flex', justifyContent: 'center' }}>
+                            <Grid size={{ xs: 12, sm: 1 }} sx={{ display: 'flex', justifyContent: 'center' }}>
                                 <IconButton
                                     color="error"
                                     onClick={() => handleRemoveCriteria(index)}

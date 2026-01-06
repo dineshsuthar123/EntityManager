@@ -1,9 +1,6 @@
 import React from 'react';
-import { Grid } from '@mui/material';
-import type { GridBaseProps } from '@mui/material';
-import type { SystemProps } from '@mui/system';
-import type { Theme } from '@mui/material/styles';
-import type { SxProps } from '@mui/system';
+import Grid from '@mui/material/Grid';
+import type { SxProps, Theme } from '@mui/material/styles';
 
 type GridContainerProps = {
     children: React.ReactNode;
@@ -12,15 +9,30 @@ type GridContainerProps = {
     justifyContent?: 'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around' | 'space-evenly';
     alignItems?: 'flex-start' | 'center' | 'flex-end' | 'stretch' | 'baseline';
     sx?: SxProps<Theme>;
-} & Omit<GridBaseProps & SystemProps<Theme>, 'component'>;
+};
 
 /**
- * A wrapper for MUI Grid container component that automatically adds the component="div" prop
- * to fix the "Property 'component' is missing" TypeScript error in MUI v7+
+ * A wrapper for MUI Grid container component for MUI v7+
  */
-export const GridContainer: React.FC<GridContainerProps> = ({ children, ...props }) => {
+export const GridContainer: React.FC<GridContainerProps> = ({ 
+    children, 
+    spacing,
+    direction,
+    justifyContent,
+    alignItems,
+    sx,
+    ...rest 
+}) => {
     return (
-        <Grid component="div" container {...props}>
+        <Grid 
+            container 
+            spacing={spacing}
+            direction={direction}
+            justifyContent={justifyContent}
+            alignItems={alignItems}
+            sx={sx}
+            {...rest}
+        >
             {children}
         </Grid>
     );
