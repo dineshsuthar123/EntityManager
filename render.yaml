@@ -22,9 +22,9 @@ services:
     staticPublishPath: dist
     autoDeployTrigger: commit
     envVars:
-      # IMPORTANT: After the first backend deploy, update this to the real backend URL
+      # Backend URL for API calls
       - key: VITE_API_URL
-        value: https://REPLACE-WITH-BACKEND.onrender.com/api
+        value: https://entitymanager-hx8b.onrender.com/api
     routes:
       # SPA rewrite so client-side routing works on refresh/deep links
       - type: rewrite
