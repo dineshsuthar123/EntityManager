@@ -18,12 +18,13 @@ import {
   Divider,
   Chip,
   Tooltip,
-  IconButton
+  IconButton,
+  alpha
 } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import StorageIcon from '@mui/icons-material/Storage';
 import GroupIcon from '@mui/icons-material/Group';
@@ -49,6 +50,7 @@ import { CustomColumnType } from './types/MyEntityDTO';
 import AuthService from './services/auth.service';
 import http from './services/http';
 import { API_URLS } from './config/api-config';
+import { quantColors } from './theme/quantTheme';
 
 const API_URL = API_URLS.ENTITIES;
 
@@ -194,8 +196,22 @@ const NavigationTabs: React.FC<{ isAuthenticated: boolean }> = ({ isAuthenticate
     <Tabs
       value={getTabValue()}
       sx={{
-        '& .MuiTab-root': { color: 'rgba(255,255,255,0.8)', minWidth: 'auto' },
-        '& .Mui-selected': { color: 'white' },
+        '& .MuiTab-root': { 
+          color: quantColors.text.secondary, 
+          minWidth: 'auto',
+          fontWeight: 500,
+          '&:hover': {
+            color: quantColors.text.primary,
+          }
+        },
+        '& .Mui-selected': { 
+          color: `${quantColors.accent.main} !important` 
+        },
+        '& .MuiTabs-indicator': {
+          backgroundColor: quantColors.accent.main,
+          height: 3,
+          borderRadius: '3px 3px 0 0',
+        },
         flexGrow: 1,
         display: { xs: 'none', md: 'flex' }
       }}
@@ -352,7 +368,7 @@ const AppContent: React.FC = () => {
       width: '100vw',
       display: 'flex',
       flexDirection: 'column',
-      background: 'linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%)',
+      background: quantColors.background.default,
       overflowX: 'hidden',
       overflowY: 'auto',
       position: 'fixed',
@@ -361,9 +377,17 @@ const AppContent: React.FC = () => {
       margin: 0,
       padding: 0
     }}>
-      <AppBar position="sticky" color="primary" sx={{ boxShadow: 3, width: '100%' }}>
+      <AppBar 
+        position="sticky" 
+        sx={{ 
+          backgroundColor: quantColors.primary.main,
+          borderBottom: `1px solid ${quantColors.border.subtle}`,
+          boxShadow: 'none',
+          width: '100%' 
+        }}
+      >
         <Toolbar sx={{ width: '100%' }}>
-          <MenuBookIcon sx={{ mr: 2, fontSize: 32 }} />
+          <ShowChartIcon sx={{ mr: 2, fontSize: 32, color: quantColors.accent.main }} />
           <Typography 
             variant="h5" 
             fontWeight={700} 
@@ -373,7 +397,7 @@ const AppContent: React.FC = () => {
             to="/"
             style={{ textDecoration: 'none', color: 'inherit' }}
           >
-            Entity Management
+            Entity<span style={{ color: quantColors.accent.main }}>Manager</span>
           </Typography>
           
           <NavigationTabs isAuthenticated={isAuthenticated} />
@@ -387,24 +411,29 @@ const AppContent: React.FC = () => {
                   color="inherit"
                   component={Link}
                   to="/login"
-                  sx={{ color: 'white' }}
+                  sx={{ 
+                    color: quantColors.text.secondary,
+                    '&:hover': {
+                      color: quantColors.text.primary,
+                    }
+                  }}
                 >
                   Login
                 </Button>
                 <Button
-                  variant="outlined"
+                  variant="contained"
                   component={Link}
                   to="/signup"
                   sx={{ 
-                    color: 'white', 
-                    borderColor: 'rgba(255,255,255,0.5)',
+                    backgroundColor: quantColors.accent.main,
+                    color: quantColors.primary.main,
+                    fontWeight: 600,
                     '&:hover': {
-                      borderColor: 'white',
-                      backgroundColor: 'rgba(255,255,255,0.1)'
+                      backgroundColor: quantColors.accent.light,
                     }
                   }}
                 >
-                  Sign Up
+                  Get Started
                 </Button>
               </>
             )}
@@ -417,75 +446,132 @@ const AppContent: React.FC = () => {
         <Route path="/" element={
           isAuthenticated ? (
             <Box sx={{
-              bgcolor: 'primary.dark',
               color: 'white',
               py: 6,
               width: '100%',
-              backgroundImage: 'linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(https://images.unsplash.com/photo-1557683311-eac922347aa1?q=80&w=1000)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
+              background: `linear-gradient(135deg, ${quantColors.primary.light} 0%, ${quantColors.background.default} 100%)`,
+              borderBottom: `1px solid ${quantColors.border.subtle}`,
               boxSizing: 'border-box'
             }}>
               <Container disableGutters maxWidth={false} sx={{ width: '100%', px: { xs: 2, sm: 3, md: 4, lg: 5 }, boxSizing: 'border-box' }}>
-                <Typography variant="h3" fontWeight={700} gutterBottom>
-                  Welcome, {currentUser?.firstName || 'User'}!
+                <Typography 
+                  variant="overline" 
+                  sx={{ 
+                    color: quantColors.accent.main,
+                    letterSpacing: '0.2em',
+                    mb: 1,
+                    display: 'block'
+                  }}
+                >
+                  DASHBOARD OVERVIEW
                 </Typography>
-                <Typography variant="h6" gutterBottom sx={{ mb: 4, maxWidth: '700px' }}>
+                <Typography variant="h3" fontWeight={700} gutterBottom>
+                  Welcome back, {currentUser?.firstName || 'User'}
+                </Typography>
+                <Typography variant="h6" sx={{ mb: 4, maxWidth: '700px', color: quantColors.text.secondary }}>
                   Manage your entities with full CRUD operations, custom columns, and powerful analytics
                 </Typography>
 
                 <Grid component="div" container spacing={3} sx={{ mt: 2 }}>
                   <GridItem xs={12} sm={6} md={3}>
-                    <Card sx={{ bgcolor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(5px)', color: 'white' }}>
+                    <Card sx={{ 
+                      backgroundColor: alpha(quantColors.background.card, 0.8),
+                      backdropFilter: 'blur(10px)',
+                      border: `1px solid ${quantColors.border.subtle}`,
+                      color: 'white' 
+                    }}>
                       <CardContent>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <DashboardIcon sx={{ fontSize: 40, mr: 2 }} />
+                          <Box sx={{ 
+                            p: 1.5, 
+                            borderRadius: 2, 
+                            backgroundColor: alpha(quantColors.accent.main, 0.15),
+                            mr: 2
+                          }}>
+                            <DashboardIcon sx={{ fontSize: 32, color: quantColors.accent.main }} />
+                          </Box>
                           <Box>
-                            <Typography variant="h4" fontWeight="bold">{entities.length}</Typography>
-                            <Typography variant="body2">Total Entities</Typography>
+                            <Typography variant="h4" fontWeight="bold" sx={{ color: quantColors.accent.main }}>{entities.length}</Typography>
+                            <Typography variant="body2" sx={{ color: quantColors.text.secondary }}>Total Entities</Typography>
                           </Box>
                         </Box>
                       </CardContent>
                     </Card>
                   </GridItem>
                   <GridItem xs={12} sm={6} md={3}>
-                    <Card sx={{ bgcolor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(5px)', color: 'white' }}>
+                    <Card sx={{ 
+                      backgroundColor: alpha(quantColors.background.card, 0.8),
+                      backdropFilter: 'blur(10px)',
+                      border: `1px solid ${quantColors.border.subtle}`,
+                      color: 'white' 
+                    }}>
                       <CardContent>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <StorageIcon sx={{ fontSize: 40, mr: 2 }} />
+                          <Box sx={{ 
+                            p: 1.5, 
+                            borderRadius: 2, 
+                            backgroundColor: alpha(quantColors.gold.main, 0.15),
+                            mr: 2
+                          }}>
+                            <StorageIcon sx={{ fontSize: 32, color: quantColors.gold.main }} />
+                          </Box>
                           <Box>
-                            <Typography variant="h4" fontWeight="bold">
+                            <Typography variant="h4" fontWeight="bold" sx={{ color: quantColors.gold.main }}>
                               {entities.reduce((acc, e) => acc + (e.customColumns?.length || 0), 0)}
                             </Typography>
-                            <Typography variant="body2">Custom Columns</Typography>
+                            <Typography variant="body2" sx={{ color: quantColors.text.secondary }}>Custom Columns</Typography>
                           </Box>
                         </Box>
                       </CardContent>
                     </Card>
                   </GridItem>
                   <GridItem xs={12} sm={6} md={3}>
-                    <Card sx={{ bgcolor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(5px)', color: 'white' }}>
+                    <Card sx={{ 
+                      backgroundColor: alpha(quantColors.background.card, 0.8),
+                      backdropFilter: 'blur(10px)',
+                      border: `1px solid ${quantColors.border.subtle}`,
+                      color: 'white' 
+                    }}>
                       <CardContent>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <GroupIcon sx={{ fontSize: 40, mr: 2 }} />
+                          <Box sx={{ 
+                            p: 1.5, 
+                            borderRadius: 2, 
+                            backgroundColor: alpha(quantColors.info, 0.15),
+                            mr: 2
+                          }}>
+                            <GroupIcon sx={{ fontSize: 32, color: quantColors.info }} />
+                          </Box>
                           <Box>
-                            <Typography variant="h4" fontWeight="bold">
+                            <Typography variant="h4" fontWeight="bold" sx={{ color: quantColors.info }}>
                               {userRoles.length}
                             </Typography>
-                            <Typography variant="body2">Your Roles</Typography>
+                            <Typography variant="body2" sx={{ color: quantColors.text.secondary }}>Your Roles</Typography>
                           </Box>
                         </Box>
                       </CardContent>
                     </Card>
                   </GridItem>
                   <GridItem xs={12} sm={6} md={3}>
-                    <Card sx={{ bgcolor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(5px)', color: 'white' }}>
+                    <Card sx={{ 
+                      backgroundColor: alpha(quantColors.background.card, 0.8),
+                      backdropFilter: 'blur(10px)',
+                      border: `1px solid ${quantColors.border.subtle}`,
+                      color: 'white' 
+                    }}>
                       <CardContent>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <PersonIcon sx={{ fontSize: 40, mr: 2 }} />
+                          <Box sx={{ 
+                            p: 1.5, 
+                            borderRadius: 2, 
+                            backgroundColor: alpha(quantColors.success, 0.15),
+                            mr: 2
+                          }}>
+                            <PersonIcon sx={{ fontSize: 32, color: quantColors.success }} />
+                          </Box>
                           <Box>
-                            <Typography variant="h4" fontWeight="bold">Active</Typography>
-                            <Typography variant="body2">Session Status</Typography>
+                            <Typography variant="h4" fontWeight="bold" sx={{ color: quantColors.success }}>Active</Typography>
+                            <Typography variant="body2" sx={{ color: quantColors.text.secondary }}>Session Status</Typography>
                           </Box>
                         </Box>
                       </CardContent>
@@ -515,14 +601,32 @@ const AppContent: React.FC = () => {
             {/* Protected Routes */}
             <Route path="/" element={
               isAuthenticated ? (
-                <Paper elevation={3} sx={{ p: { xs: 2, sm: 3, md: 4 }, borderRadius: 2, width: '100%', boxSizing: 'border-box' }}>
+                <Paper 
+                  elevation={0} 
+                  sx={{ 
+                    p: { xs: 2, sm: 3, md: 4 }, 
+                    borderRadius: 3, 
+                    width: '100%', 
+                    boxSizing: 'border-box',
+                    backgroundColor: quantColors.background.card,
+                    border: `1px solid ${quantColors.border.subtle}`,
+                  }}
+                >
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
                     <Typography variant="h5" fontWeight={600}>Entity List</Typography>
                     <Button
                       variant="contained"
-                      color="primary"
                       onClick={handleCreate}
-                      sx={{ fontWeight: 600, borderRadius: 2, boxShadow: 2 }}
+                      sx={{ 
+                        fontWeight: 600, 
+                        borderRadius: 2,
+                        backgroundColor: quantColors.accent.main,
+                        color: quantColors.primary.main,
+                        boxShadow: `0 4px 14px ${alpha(quantColors.accent.main, 0.4)}`,
+                        '&:hover': {
+                          backgroundColor: quantColors.accent.light,
+                        }
+                      }}
                     >
                       Add New Entity
                     </Button>
@@ -531,11 +635,11 @@ const AppContent: React.FC = () => {
                 </Paper>
               ) : (
                 <Box sx={{ textAlign: 'center', py: 8 }}>
-                  <Typography variant="h4" gutterBottom fontWeight={600}>
-                    Welcome to Entity Management System
+                  <Typography variant="h4" gutterBottom fontWeight={600} sx={{ color: quantColors.text.primary }}>
+                    Welcome to Entity<span style={{ color: quantColors.accent.main }}>Manager</span>
                   </Typography>
-                  <Typography variant="h6" color="text.secondary" sx={{ mb: 4 }}>
-                    Please sign in to manage your entities
+                  <Typography variant="h6" sx={{ mb: 4, color: quantColors.text.secondary }}>
+                    Enterprise-grade entity management for data professionals
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
                     <Button 
@@ -543,6 +647,15 @@ const AppContent: React.FC = () => {
                       size="large" 
                       component={Link} 
                       to="/login"
+                      sx={{
+                        backgroundColor: quantColors.accent.main,
+                        color: quantColors.primary.main,
+                        fontWeight: 600,
+                        px: 4,
+                        '&:hover': {
+                          backgroundColor: quantColors.accent.light,
+                        }
+                      }}
                     >
                       Sign In
                     </Button>
@@ -551,6 +664,16 @@ const AppContent: React.FC = () => {
                       size="large" 
                       component={Link} 
                       to="/signup"
+                      sx={{
+                        borderColor: quantColors.border.strong,
+                        color: quantColors.text.secondary,
+                        fontWeight: 600,
+                        px: 4,
+                        '&:hover': {
+                          borderColor: quantColors.accent.main,
+                          color: quantColors.accent.main,
+                        }
+                      }}
                     >
                       Create Account
                     </Button>
@@ -569,7 +692,17 @@ const AppContent: React.FC = () => {
 
             <Route path="/search" element={
               isAuthenticated ? (
-                <Paper elevation={3} sx={{ p: { xs: 2, sm: 3, md: 4 }, borderRadius: 2, width: '100%', boxSizing: 'border-box' }}>
+                <Paper 
+                  elevation={0} 
+                  sx={{ 
+                    p: { xs: 2, sm: 3, md: 4 }, 
+                    borderRadius: 3, 
+                    width: '100%', 
+                    boxSizing: 'border-box',
+                    backgroundColor: quantColors.background.card,
+                    border: `1px solid ${quantColors.border.subtle}`,
+                  }}
+                >
                   <Typography variant="h5" fontWeight={600} sx={{ mb: 3 }}>Advanced Search</Typography>
                   <AdvancedSearch
                     entities={entities}
@@ -627,10 +760,21 @@ const AppContent: React.FC = () => {
       </Box>
 
       {/* Footer */}
-      <Box component="footer" sx={{ py: 3, bgcolor: 'primary.main', color: 'white', mt: 'auto', width: '100%', flexShrink: 0 }}>
+      <Box 
+        component="footer" 
+        sx={{ 
+          py: 3, 
+          backgroundColor: quantColors.primary.main, 
+          borderTop: `1px solid ${quantColors.border.subtle}`,
+          color: quantColors.text.secondary, 
+          mt: 'auto', 
+          width: '100%', 
+          flexShrink: 0 
+        }}
+      >
         <Container disableGutters maxWidth={false}>
           <Typography variant="body2" align="center">
-            © {new Date().getFullYear()} Entity Management System. Built with Spring Boot, React and Material-UI.
+            © {new Date().getFullYear()} Entity<span style={{ color: quantColors.accent.main }}>Manager</span> — Built with precision for data professionals
           </Typography>
         </Container>
       </Box>

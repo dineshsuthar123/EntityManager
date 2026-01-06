@@ -7,9 +7,13 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,6 +39,9 @@ import com.example.project1.security.UserDetailsImpl;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+    
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    
     @Autowired
     AuthenticationManager authenticationManager;
 
@@ -52,6 +59,8 @@ public class AuthController {
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+        logger.info("Login attempt for user: {}", loginRequest.getUsername());
+        
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
@@ -64,6 +73,8 @@ public class AuthController {
                     .map(item -> item.getAuthority())
                     .collect(Collectors.toList());
 
+            logger.info("User {} logged in successfully with roles: {}", userDetails.getUsername(), roles);
+
             return ResponseEntity.ok(new JwtResponse(jwt, 
                                                      userDetails.getId(), 
                                                      userDetails.getUsername(),
@@ -71,39 +82,76 @@ public class AuthController {
                                                      userDetails.getLastName(), 
                                                      userDetails.getEmail(), 
                                                      roles));
+        } catch (BadCredentialsException e) {
+            logger.warn("Invalid credentials for user: {}", loginRequest.getUsername());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new MessageResponse("Error: Invalid username or password!"));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid credentials!"));
+            logger.error("Authentication error for user: {} - {}", loginRequest.getUsername(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Error: Authentication failed - " + e.getMessage()));
         }
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+        logger.info("Registration attempt for user: {}", signUpRequest.getUsername());
+        
         try {
+            // Validate input fields
+            if (signUpRequest.getUsername() == null || signUpRequest.getUsername().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is required!"));
+            }
+            
+            if (signUpRequest.getEmail() == null || signUpRequest.getEmail().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is required!"));
+            }
+            
+            if (signUpRequest.getPassword() == null || signUpRequest.getPassword().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(new MessageResponse("Error: Password is required!"));
+            }
+            
+            // Check if username already exists
             if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+                logger.warn("Username already taken: {}", signUpRequest.getUsername());
                 return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
             }
 
+            // Check if email already exists
             if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+                logger.warn("Email already in use: {}", signUpRequest.getEmail());
                 return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
             }
 
-            User user = new User(signUpRequest.getUsername(),
-                                 signUpRequest.getFirstName(),
-                                 signUpRequest.getLastName(),
-                                 signUpRequest.getEmail(),
-                                 encoder.encode(signUpRequest.getPassword()));
+            // Create new user
+            User user = new User(
+                signUpRequest.getUsername().trim(),
+                signUpRequest.getFirstName() != null ? signUpRequest.getFirstName().trim() : "",
+                signUpRequest.getLastName() != null ? signUpRequest.getLastName().trim() : "",
+                signUpRequest.getEmail().trim(),
+                encoder.encode(signUpRequest.getPassword())
+            );
 
+            // Assign default ROLE_USER
             Set<Role> roles = new HashSet<>();
             Role userRole = roleRepository.findByName(Role.ERole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                    .orElseThrow(() -> new RuntimeException("Error: Default role not found. Please contact administrator."));
             roles.add(userRole);
 
             user.setRoles(roles);
             userRepository.save(user);
 
+            logger.info("User {} registered successfully!", signUpRequest.getUsername());
             return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+            
+        } catch (RuntimeException e) {
+            logger.error("Registration error for user: {} - {}", signUpRequest.getUsername(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Error: Registration failed - " + e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Registration failed!"));
+            logger.error("Unexpected error during registration for user: {} - {}", signUpRequest.getUsername(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Error: An unexpected error occurred during registration."));
         }
     }
 }

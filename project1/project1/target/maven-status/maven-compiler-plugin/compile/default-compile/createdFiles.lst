@@ -39,8 +39,7 @@ com\example\project1\service\FileStorageService.class
 com\example\project1\service\ExportImportService.class
 com\example\project1\dto\JwtResponse.class
 com\example\project1\controller\HomeController.class
-com\example\project1\config\WebConfig$1.class
+com\example\project1\controller\HealthController.class
 com\example\project1\controller\MyEntityRestController.class
 com\example\project1\dto\LoginRequest.class
 com\example\project1\service\EntityService.class
-com\example\project1\config\DataInitializer.class

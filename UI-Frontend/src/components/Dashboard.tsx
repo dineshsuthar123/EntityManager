@@ -12,7 +12,8 @@ import {
     FormControl,
     InputLabel,
     Select,
-    MenuItem
+    MenuItem,
+    alpha
 } from '@mui/material';
 import {
     Chart as ChartJS,
@@ -29,6 +30,7 @@ import {
 import { Bar, Pie, Line } from 'react-chartjs-2';
 import type { MyEntityDTO } from '../types/MyEntityDTO';
 import ImportExportTools from './ImportExportTools';
+import { quantColors } from '../theme/quantTheme';
 
 ChartJS.register(
     CategoryScale,
@@ -60,12 +62,12 @@ const Dashboard: React.FC<DashboardProps> = ({ entities, isLoading }) => {
                 label: '',
                 data: [] as number[],
                 backgroundColor: [
-                    'rgba(255, 99, 132, 0.5)',
-                    'rgba(54, 162, 235, 0.5)',
-                    'rgba(255, 206, 86, 0.5)',
-                    'rgba(75, 192, 192, 0.5)',
-                    'rgba(153, 102, 255, 0.5)',
-                    'rgba(255, 159, 64, 0.5)',
+                    alpha(quantColors.accent.main, 0.7),
+                    alpha(quantColors.gold.main, 0.7),
+                    alpha(quantColors.info, 0.7),
+                    alpha(quantColors.success, 0.7),
+                    alpha(quantColors.warning, 0.7),
+                    alpha(quantColors.error, 0.7),
                 ]
             }
         ]
@@ -221,9 +223,10 @@ const Dashboard: React.FC<DashboardProps> = ({ entities, isLoading }) => {
             {
                 label: 'Created Entities',
                 data: creationStats.data,
-                borderColor: 'rgb(75, 192, 192)',
-                backgroundColor: 'rgba(75, 192, 192, 0.5)',
-                tension: 0.1
+                borderColor: quantColors.accent.main,
+                backgroundColor: alpha(quantColors.accent.main, 0.3),
+                tension: 0.4,
+                fill: true
             }
         ]
     };    // Update pie chart data when custom column stats change
@@ -236,12 +239,12 @@ const Dashboard: React.FC<DashboardProps> = ({ entities, isLoading }) => {
                         label: customColumnStats[0].columnName,
                         data: Object.values(customColumnStats[0].valueCount),
                         backgroundColor: [
-                            'rgba(255, 99, 132, 0.5)',
-                            'rgba(54, 162, 235, 0.5)',
-                            'rgba(255, 206, 86, 0.5)',
-                            'rgba(75, 192, 192, 0.5)',
-                            'rgba(153, 102, 255, 0.5)',
-                            'rgba(255, 159, 64, 0.5)',
+                            alpha(quantColors.accent.main, 0.7),
+                            alpha(quantColors.gold.main, 0.7),
+                            alpha(quantColors.info, 0.7),
+                            alpha(quantColors.success, 0.7),
+                            alpha(quantColors.warning, 0.7),
+                            alpha(quantColors.error, 0.7),
                         ]
                     }
                 ]
@@ -252,7 +255,7 @@ const Dashboard: React.FC<DashboardProps> = ({ entities, isLoading }) => {
                 datasets: [{
                     label: 'No Data',
                     data: [1],
-                    backgroundColor: ['#e0e0e0']
+                    backgroundColor: [quantColors.border.strong]
                 }]
             });
         }
@@ -270,7 +273,17 @@ const Dashboard: React.FC<DashboardProps> = ({ entities, isLoading }) => {
             {/* Import/Export Tools Component */}
             <ImportExportTools />
 
-            <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 4, borderRadius: 2 }}>
+            <Paper 
+                elevation={0} 
+                sx={{ 
+                    p: 3, 
+                    mb: 4, 
+                    mt: 4, 
+                    borderRadius: 3,
+                    backgroundColor: quantColors.background.card,
+                    border: `1px solid ${quantColors.border.subtle}`,
+                }}
+            >
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                     <Typography variant="h5" fontWeight={600}>Dashboard Analytics</Typography>
                     <FormControl size="small" sx={{ width: 150 }}>
@@ -291,13 +304,13 @@ const Dashboard: React.FC<DashboardProps> = ({ entities, isLoading }) => {
                     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                         <Card
                             sx={{
-                                bgcolor: 'primary.light',
-                                color: 'primary.contrastText',
+                                backgroundColor: alpha(quantColors.accent.main, 0.1),
+                                border: `1px solid ${alpha(quantColors.accent.main, 0.3)}`,
                                 height: '100%',
                                 transition: 'transform 0.2s, box-shadow 0.2s',
                                 '&:hover': {
                                     transform: 'translateY(-4px)',
-                                    boxShadow: '0 8px 16px rgba(0,0,0,0.2)'
+                                    boxShadow: `0 8px 24px ${alpha(quantColors.accent.main, 0.2)}`
                                 }
                             }}
                         >
